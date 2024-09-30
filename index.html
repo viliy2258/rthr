@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ПРИЗ 100$</title>
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: radial-gradient(circle, #e2e2e2, #c9c9c9);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+            transition: background 0.8s ease;
+            padding: 0;
+        }
+        
+        /* Заголовок */
+        h1 {
+            font-size: 5vw;
+            color: #333;
+            margin-bottom: 5vw;
+            text-shadow: 3px 3px 10px rgba(0, 0, 0, 0.3);
+            animation: dropIn 1s ease-out forwards;
+        }
+        
+        /* Дошка гри */
+        .board {
+            display: grid;
+            grid-template-columns: repeat(3, 30vw);
+            grid-template-rows: repeat(3, 30vw);
+            gap: 3vw;
+            transform: scale(1);
+            animation: bounceIn 0.8s ease-out forwards;
+            transform-origin: center;
+        }
+        
+        /* Клітинки */
+        .cell {
+            width: 30vw;
+            height: 30vw;
+            background-color: #ffffff;
+            border-radius: 3vw;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 8vw;
+            font-weight: bold;
+            color: #555;
+            cursor: pointer;
+            transition: transform 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .cell:hover {
+            transform: scale(1.1) rotate(10deg);
+            background-color: #f5f5f5;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        /* Анімації для X і O */
+        .cell.X {
+            color: #ff5252;
+            animation: revealX 0.5s ease-out forwards, glowX 1.5s infinite alternate;
+        }
+        
+        .cell.O {
+            color: #42a5f5;
+            animation: revealO 0.5s ease-out forwards, glowO 1.5s infinite alternate;
+        }
+        
+        /* Повідомлення */
+        #message {
+            margin-top: 5vw;
+            font-size: 4vw;
+            color: #333;
+            text-align: center;
+            font-weight: bold;
+            animation: fadeInMessage 0.7s ease-in-out;
+            padding: 2vw 4vw;
+            border-radius: 3vw;
+            background-color: rgba(255, 255, 255, 0.85);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        #message:hover {
+            transform: scale(1.05);
+            box-shadow: 0 12px 25px rgba(0, 0, 0, 0.3);
+        }
+        
+        /* Лічильник спроб */
+        #attempts {
+            margin-top: 5vw;
+            font-size: 3vw;
+            color: #ff5252;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+            animation: slideUpAttempts 0.7s ease-in-out forwards, pulseAttempts 1.5s infinite alternate;
+        }
+        
+        /* Анімації */
+        @keyframes revealX {
+            0% { opacity: 0; transform: scale(0.5) rotate(15deg); }
+            100% { opacity: 1; transform: scale(1) rotate(0deg); }
+        }
+        
+        @keyframes revealO {
+            0% { opacity: 0; transform: scale(0.5) rotate(-15deg); }
+            100% { opacity: 1; transform: scale(1) rotate(0deg); }
+        }
+        
+        @keyframes fadeInMessage {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes slideUpAttempts {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes bounceIn {
+            0% { transform: scale(0.8); opacity: 0; }
+            60% { transform: scale(1.05); opacity: 1; }
+            100% { transform: scale(1); }
+        }
+        
+        @keyframes dropIn {
+            0% { transform: translateY(-100%); opacity: 0; }
+            100% { transform: translateY(0); opacity: 1; }
+        }
+        
+        @keyframes glowX {
+            0% { text-shadow: 0 0 10px #ff5252, 0 0 20px #ff5252, 0 0 30px #ff5252; }
+            100% { text-shadow: 0 0 15px #ff0000, 0 0 25px #ff0000, 0 0 40px #ff0000; }
+        }
+        
+        @keyframes glowO {
+            0% { text-shadow: 0 0 10px #42a5f5, 0 0 20px #42a5f5, 0 0 30px #42a5f5; }
+            100% { text-shadow: 0 0 15px #2979ff, 0 0 25px #2979ff, 0 0 40px #2979ff; }
+        }
+        
+        @keyframes pulseAttempts {
+            0% { transform: scale(1); }
+            100% { transform: scale(1.05); }
+        }
+        
+        /* Медіа-запит для маленьких екранів */
+        @media (max-width: 600px) {
+            body {
+                padding: 5vw;
+                overflow-y: auto;
+            }
+        
+            h1 {
+                font-size: 7vw;
+                margin-bottom: 3vw;
+            }
+        
+            .board {
+                grid-template-columns: repeat(3, 20vw);
+                grid-template-rows: repeat(3, 20vw);
+                gap: 2vw;
+            }
+        
+            .cell {
+                width: 20vw;
+                height: 20vw;
+                font-size: 5vw;
+                border-radius: 2vw;
+            }
+        
+            #message {
+                font-size: 3vw;
+                padding: 1.5vw 3vw;
+                margin-top: 3vw;
+            }
+        
+            #attempts {
+                font-size: 2.5vw;
+                margin-top: 4vw;
+            }
+        }
+        
+        /* Стиль для іконки історії */
+        .history-icon {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            font-size: 8vw;
+            cursor: pointer;
+            color: #000;
+            z-index: 10;
+            transition: transform 0.3s ease;
+        }
+        
+        .history-icon:hover {
+            transform: scale(1.2);
+        }
+        
+        /* Мобільний стиль для історії */
+        .history {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: #fff;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            overflow-y: auto;
+            transform: translateX(100%);
+            transition: transform 0.4s ease, opacity 0.4s ease;
+            opacity: 0;
+            z-index: 20;
+        }
+        
+        .history.active {
+            transform: translateX(0);
+            opacity: 1;
+        }
+        
+        /* Заголовок історії */
+        .history h2 {
+            font-size: 6vw;
+            color: #000;
+            text-align: center;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        /* Хрестик для закриття історії */
+        .close-history {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 6vw;
+            color: #000;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+        
+        .close-history:hover {
+            color: #555;
+        }
+        
+        /* Список результатів */
+        .history ul {
+            list-style-type: none;
+            padding: 0;
+            width: 90%;
+            margin: 20px auto 0;
+            font-size: 4vw;
+        }
+        
+        /* Елемент списку результатів */
+        .history li {
+            background-color: #f1f1f1;
+            margin: 10px 0;
+            padding: 10px;
+            color: #000;
+            border-radius: 10px;
+            border: 1px solid #ddd;
+        }
+         
+    </style>
+
+    <!-- Font Awesome для іконки Gamepad -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
+        import { getDatabase, ref, set, push, onValue } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-database.js";
+
+        // Firebase конфігурація
+        const firebaseConfig = {
+            apiKey: "AIzaSyD-5CPzp5iwNHUxloFkDBf3J8gRlUpbGVc",
+            authDomain: "ton-not.firebaseapp.com",
+            databaseURL: "https://ton-not-default-rtdb.firebaseio.com",
+            projectId: "ton-not",
+            storageBucket: "ton-not.appspot.com",
+            messagingSenderId: "729333286761",
+            appId: "1:729333286761:web:741fdeb1572cc1908bdff8",
+            measurementId: "G-JKCWNWTLBT"
+        };
+
+        // Ініціалізація Firebase
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+
+        // Функція для збереження результатів гри
+        function saveGameResult(result, winner, loser) {
+            const resultsRef = ref(database, 'gameResults');
+            const newResultRef = push(resultsRef);
+            set(newResultRef, {
+                result: result,
+                winner: winner,
+                loser: loser,
+                timestamp: new Date().toISOString()
+            });
+        }
+
+        // Функція для завантаження історії ігор
+        function loadGameResults() {
+            const resultsRef = ref(database, 'gameResults');
+            onValue(resultsRef, (snapshot) => {
+                const data = snapshot.val();
+                if (data) {
+                    const gameResults = Object.values(data);
+                    updateHistory(gameResults);
+                }
+            });
+        }
+
+        // Оновлення історії ігор на екрані
+        function updateHistory(results) {
+            const historyElement = document.getElementById('gameResults');
+            historyElement.innerHTML = '';
+            results.forEach((result) => {
+                const listItem = document.createElement('li');
+                listItem.textContent = `Результат: ${result.result}, Переможець: ${result.winner}, Програвший: ${result.loser}, Дата: ${result.timestamp}`;
+                historyElement.appendChild(listItem);
+            });
+        }
+
+        // Функція для отримання Telegram ID користувача
+        function getTelegramID() {
+            const tg = window.Telegram.WebApp;
+            const user = tg.initDataUnsafe.user;
+            if (user) {
+                const userId = user.id;
+                document.getElementById('telegramId').textContent = `Ваш Telegram ID: ${userId}`;
+            } else {
+                document.getElementById('telegramId').textContent = 'Не вдалося отримати ваш Telegram ID.';
+            }
+        }
+
+        // Завантаження історії ігор при завантаженні сторінки
+        window.addEventListener('load', () => {
+            loadGameResults();
+            getTelegramID();
+        });
+    </script>
+    
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <h1>ПРИЗ 100$</h1>
+
+    <!-- Іконка для відкриття історії -->
+    <div class="history-icon" id="historyIcon"><i class="fas fa-gamepad"></i></div>
+
+    <!-- Повідомлення Telegram ID -->
+    <p id="telegramId">Завантажуємо ваш Telegram ID...</p>
+
+    <!-- Ігрова дошка -->
+    <div class="board">
+        <div class="cell" data-index="0"></div>
+        <div class="cell" data-index="1"></div>
+        <div class="cell" data-index="2"></div>
+        <div class="cell" data-index="3"></div>
+        <div class="cell" data-index="4"></div>
+        <div class="cell" data-index="5"></div>
+        <div class="cell" data-index="6"></div>
+        <div class="cell" data-index="7"></div>
+        <div class="cell" data-index="8"></div>
+    </div>
+
+    <!-- Повідомлення про результат -->
+    <div id="message" class="result-text">Залишилось спроб: 10</div>
+
+    <!-- Список результатів гри -->
+    <div class="history" id="history">
+        <h2>Історія ігор <span class="close-history" id="closeHistory">✖</span></h2>
+        <ul id="gameResults"></ul>
+    </div>
+
+    <!-- Скрипт для логіки гри -->
+    <script>
+        const cells = document.querySelectorAll('.cell');
+        const messageElement = document.getElementById('message');
+        let currentPlayer = 'O'; // Людина починає гру
+        let board = ['', '', '', '', '', '', '', '', ''];
+        let gameActive = true;
+        let attemptsLeft = 10;
+        let turnNumber = 0; // Номер ходу
+        let isHumanTurn = true; // Додаємо змінну для визначення черги ходу
+
+        const winningConditions = [
+            [0, 1, 2],
+            [3, 4, 5],
+            [6, 7, 8],
+            [0, 3, 6],
+            [1, 4, 7],
+            [2, 5, 8],
+            [0, 4, 8],
+            [2, 4, 6]
+        ];
+
+        cells.forEach(cell => {
+            cell.addEventListener('click', handleCellClick);
+        });
+
+        function handleCellClick(event) {
+            if (attemptsLeft <= 0 || !gameActive || !isHumanTurn) {
+                return; // Блокуємо кліки, якщо гра закінчена або не черга гравця
+            }
+
+            const clickedCell = event.target;
+            const clickedCellIndex = clickedCell.getAttribute('data-index');
+
+            if (board[clickedCellIndex] !== '') {
+                return; // Клітинка вже зайнята
+            }
+
+            updateCell(clickedCell, clickedCellIndex);
+            checkResult();
+
+            if (gameActive) {
+                turnNumber++;
+                isHumanTurn = false; // Завершуємо хід гравця
+                currentPlayer = 'X'; // Перемикаємо гравця на робота
+                if (currentPlayer === 'X' && attemptsLeft > 0) {
+                    setTimeout(robotMove, 500); // Затримка перед ходом робота
+                }
+            }
+        }
+
+        function updateCell(cell, index) {
+            board[index] = currentPlayer;
+            cell.textContent = currentPlayer;
+            cell.classList.add(currentPlayer);
+            cell.classList.add('animate'); // Додаємо анімацію
+            setTimeout(() => cell.classList.remove('animate'), 500); // Видаляємо анімацію через 500 мс
+        }
+
+        function checkResult() {
+            let roundWon = false;
+            for (let i = 0; i < winningConditions.length; i++) {
+                const [a, b, c] = winningConditions[i];
+                if (board[a] && board[a] === board[b] && board[a] === board[c]) {
+                    roundWon = true;
+                    break;
+                }
+            }
+
+            if (roundWon) {
+                messageElement.textContent = `Гравець ${currentPlayer} виграв!`;
+                gameActive = false;
+                setTimeout(resetGame, 2000);
+                attemptsLeft--;
+                updateAttempts();
+                saveGameResult('Перемога', currentPlayer, currentPlayer === 'O' ? 'X' : 'O'); // Зберігаємо результат гри
+                return;
+            }
+
+            if (!board.includes('')) {
+                messageElement.textContent = 'Нічия!';
+                gameActive = false;
+                setTimeout(resetGame, 2000);
+                attemptsLeft--;
+                updateAttempts();
+                saveGameResult('Нічия', 'Немає', 'Немає'); // Зберігаємо результат гри
+                return;
+            }
+        }
+
+        function resetGame() {
+            board = ['', '', '', '', '', '', '', '', ''];
+            gameActive = true;
+            isHumanTurn = true; // Людина завжди починає
+            cells.forEach(cell => {
+                cell.textContent = '';
+                cell.classList.remove('X', 'O', 'animate');
+            });
+            messageElement.textContent = '';
+            currentPlayer = 'O'; // Перший хід завжди за людиною
+        }
+
+        function updateAttempts() {
+            messageElement.textContent = `Залишилось спроб: ${attemptsLeft}`;
+            if (attemptsLeft <= 0) {
+                gameActive = false;
+                messageElement.textContent = "Спроби вичерпані. Гра закінчена!";
+            }
+        }
+
+        function robotMove() {
+            if (!gameActive || attemptsLeft <= 0) return;
+
+            const bestMove = getRandomBestMove();
+            const robotCell = document.querySelector(`.cell[data-index='${bestMove}']`);
+            updateCell(robotCell, bestMove);
+            checkResult();
+
+            if (gameActive) {
+                turnNumber++;
+                isHumanTurn = true; // Після ходу робота, черга людини
+                currentPlayer = 'O';
+            }
+        }
+
+        function getRandomBestMove() {
+            const bestMoves = minimax(board, 'X');
+            const randomIndex = Math.floor(Math.random() * bestMoves.length);
+            return bestMoves[randomIndex].index;
+        }
+
+        function minimax(newBoard, player) {
+            const availableSpots = newBoard.reduce((acc, val, idx) => val === '' ? acc.concat(idx) : acc, []);
+
+            if (checkWin(newBoard, 'X')) {
+                return [{ score: 10 }];
+            } else if (checkWin(newBoard, 'O')) {
+                return [{ score: -10 }];
+            } else if (availableSpots.length === 0) {
+                return [{ score: 0 }];
+            }
+
+            const moves = [];
+
+            for (let i = 0; i < availableSpots.length; i++) {
+                const move = {};
+                move.index = availableSpots[i];
+                newBoard[availableSpots[i]] = player;
+
+                if (player === 'X') {
+                    const result = minimax(newBoard, 'O');
+                    move.score = result[0].score;
+                } else {
+                    const result = minimax(newBoard, 'X');
+                    move.score = result[0].score;
+                }
+
+                newBoard[availableSpots[i]] = '';
+                moves.push(move);
+            }
+
+            let bestMoves = [];
+            let bestScore = player === 'X' ? -Infinity : Infinity;
+
+            for (let i = 0; i < moves.length; i++) {
+                if (player === 'X' && moves[i].score > bestScore) {
+                    bestScore = moves[i].score;
+                    bestMoves = [moves[i]];
+                } else if (player === 'X' && moves[i].score === bestScore) {
+                    bestMoves.push(moves[i]);
+                } else if (player === 'O' && moves[i].score < bestScore) {
+                    bestScore = moves[i].score;
+                    bestMoves = [moves[i]];
+                } else if (player === 'O' && moves[i].score === bestScore) {
+                    bestMoves.push(moves[i]);
+                }
+            }
+
+            // Додаємо випадковий елемент
+            if (bestMoves.length > 1) {
+                const randomMoves = bestMoves.filter(move => move.score === bestScore);
+                return randomMoves;
+            }
+
+            return bestMoves;
+        }
+
+        function checkWin(board, player) {
+            for (let i = 0; i < winningConditions.length; i++) {
+                const [a, b, c] = winningConditions[i];
+                if (board[a] === player && board[b] === player && board[c] === player) {
+                    return true;
+                }
+            }
+            return false;
+        }
+    </script>
+
+    <!-- Скрипт для роботи іконки історії -->
+    <script>
+        const historyIcon = document.getElementById('historyIcon');
+        const historyDiv = document.getElementById('history');
+        const closeHistory = document.getElementById('closeHistory');
+
+        historyIcon.addEventListener('click', () => {
+            historyDiv.classList.add('active');
+        });
+
+        closeHistory.addEventListener('click', () => {
+            historyDiv.classList.remove('active');
+        });
+    </script>
+</body>
+</html>
